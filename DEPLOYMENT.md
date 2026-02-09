@@ -29,8 +29,15 @@
 ## GitHub
 
 - [x] Initial commit created (`60038a7`, `f0b0585`)
+- [x] Origin bootstrap helper added (`npm run connect:origin -- --url=... --push`)
 - [ ] Repository pushed to `main`
 - [ ] GitHub repo connected in Vercel
+
+Quick command once repo URL is known:
+
+```bash
+npm run connect:origin -- --url=https://github.com/<your-username>/<repo-name>.git --push
+```
 
 ## Vercel Project
 
