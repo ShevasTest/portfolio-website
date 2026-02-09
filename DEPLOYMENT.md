@@ -3,8 +3,23 @@
 ## Pre-flight (local)
 
 - [ ] `npm install`
-- [ ] `npm run check:deploy`
+- [ ] `npm run check:deploy` (lint + build + smoke route checks)
 - [ ] `.env.example` reviewed
+
+## CI Guardrail
+
+- [x] GitHub Actions preflight workflow added: `.github/workflows/deploy-preflight.yml`
+- [x] Push/PR to `main` runs `npm run check:deploy` automatically
+
+## Automated Smoke Coverage
+
+- [x] `npm run smoke:routes` boots production build locally and checks key routes:
+  - `/`
+  - `/projects/*`
+  - `/sitemap.xml`
+  - `/robots.txt`
+  - `/opengraph-image`
+  - `/twitter-image`
 
 ## GitHub
 

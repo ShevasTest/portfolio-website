@@ -29,6 +29,8 @@ Built with a dark neon visual language, rich motion design, and interactive proj
   - sitemap and robots routes
   - app icon and apple icon routes
 - Mobile-first responsive behavior with touch-safe animation fallbacks
+- GitHub Actions preflight workflow (`npm run check:deploy` on push/PR to `main`)
+- Production smoke route checks (`npm run smoke:routes`) before deploy
 
 ## Getting Started
 
@@ -42,10 +44,11 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Scripts
 
 ```bash
-npm run dev    # start local dev server
-npm run build  # production build
-npm run start  # start production server
-npm run lint   # run lint checks
+npm run dev           # start local dev server
+npm run build         # production build
+npm run start         # start production server
+npm run lint          # run lint checks
+npm run smoke:routes  # production smoke checks for critical routes
 ```
 
 ## Project Structure
@@ -101,4 +104,8 @@ You can copy the variable list from `.env.example`.
 npm run check:deploy
 ```
 
+`check:deploy` runs `lint + build + smoke:routes` (critical route health checks against a production server).
+
 If this passes locally, Vercel auto-deploy from `main` is ready.
+
+A CI guardrail is included in `.github/workflows/deploy-preflight.yml` to run this same preflight automatically on every push/PR to `main`.
