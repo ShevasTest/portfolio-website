@@ -186,14 +186,11 @@ function downsampleHistory(points: PricePoint[], targetPoints: number): PricePoi
 export async function getCryptoDashboardData(): Promise<CryptoDashboardData> {
   const coinIds = TRACKED_COIN_IDS.join(",");
 
-  const [marketsResponse, globalResponse, historyResponse] = await Promise.all([
+  const [marketsResponse, globalResponse] = await Promise.all([
     fetchCoinGecko<CoinMarketResponse[]>(
       `/coins/markets?vs_currency=usd&ids=${coinIds}&order=market_cap_desc&per_page=10&page=1&sparkline=true&price_change_percentage=24h,7d`
     ),
     fetchCoinGecko<GlobalResponse>("/global"),
-    fetchCoinGecko<BitcoinHistoryResponse>(
-      "/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=hourly"
-    ),
   ]);
 
   const coinOrder = new Map<TrackedCoinId, number>(
@@ -211,10 +208,17 @@ export async function getCryptoDashboardData(): Promise<CryptoDashboardData> {
       return aOrder - bOrder;
     });
 
+  // Build bitcoin 7d history from sparkline data (avoids paid market_chart endpoint)
+  const btcCoin = coins.find((c) => c.id === "bitcoin");
+  const sparkline = btcCoin?.sparkline7d ?? [];
+  const now = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const stepMs = sparkline.length > 1 ? sevenDaysMs / (sparkline.length - 1) : 0;
   const bitcoinHistory = downsampleHistory(
-    historyResponse.prices
-      .filter((point) => Number.isFinite(point[0]) && Number.isFinite(point[1]))
-      .map(([timestamp, price]) => ({ timestamp, price })),
+    sparkline.map((price, i) => ({
+      timestamp: now - sevenDaysMs + i * stepMs,
+      price,
+    })),
     64
   );
 

@@ -115,12 +115,12 @@ export function Hero() {
       ref={sectionRef}
       className="relative flex min-h-[100svh] items-center justify-center overflow-hidden py-24 sm:py-28"
     >
-      {/* 3D Particle Background */}
+      {/* 3D Particle Background — disabled on mobile/touch for performance */}
       <div className="absolute inset-0 z-0">
-        {sceneReady ? (
+        {sceneReady && !isCoarsePointer ? (
           <Scene
-            quality={isCoarsePointer ? "mobile" : "desktop"}
-            interactive={!isCoarsePointer}
+            quality="desktop"
+            interactive={true}
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-b from-bg via-bg/95 to-bg" aria-hidden />

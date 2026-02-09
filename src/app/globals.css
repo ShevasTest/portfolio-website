@@ -176,10 +176,20 @@ html.lenis body {
   .aurora-blob {
     filter: blur(64px);
     opacity: 0.09;
+    animation: none !important;
   }
 
   .noise-overlay {
-    opacity: 0.012;
+    display: none;
+  }
+}
+
+/* ─── Reduce motion for accessibility & mobile perf ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
