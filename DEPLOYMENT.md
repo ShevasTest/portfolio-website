@@ -23,7 +23,7 @@
 
 ## GitHub
 
-- [ ] Initial commit created
+- [x] Initial commit created (`60038a7`, `f0b0585`)
 - [ ] Repository pushed to `main`
 - [ ] GitHub repo connected in Vercel
 
@@ -38,6 +38,11 @@
 
 - [ ] Production domain points to `shevas.vercel.app` (or temporary `<project>.vercel.app`)
 
+## Automated Production Verification
+
+- [ ] `npm run verify:production -- --url=https://<production-domain>`
+- [ ] Verifier passes on all critical endpoints (`/`, `/projects/*`, `/sitemap.xml`, `/robots.txt`, `/opengraph-image`, `/twitter-image`)
+
 ## Final QA (production URL)
 
 - [ ] `/` homepage loads with animations and no layout shifts
@@ -48,4 +53,4 @@
 - [ ] `/projects/telegram-bot`
 - [ ] `/sitemap.xml`
 - [ ] `/robots.txt`
-- [ ] Open Graph preview is generated
+- [ ] Open Graph + Twitter previews are generated

@@ -31,6 +31,7 @@ Built with a dark neon visual language, rich motion design, and interactive proj
 - Mobile-first responsive behavior with touch-safe animation fallbacks
 - GitHub Actions preflight workflow (`npm run check:deploy` on push/PR to `main`)
 - Production smoke route checks (`npm run smoke:routes`) before deploy
+- Post-deploy production verifier (`npm run verify:production -- --url=https://...`)
 
 ## Getting Started
 
@@ -44,11 +45,12 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Scripts
 
 ```bash
-npm run dev           # start local dev server
-npm run build         # production build
-npm run start         # start production server
-npm run lint          # run lint checks
-npm run smoke:routes  # production smoke checks for critical routes
+npm run dev                 # start local dev server
+npm run build               # production build
+npm run start               # start production server
+npm run lint                # run lint checks
+npm run smoke:routes        # local production smoke checks for critical routes
+npm run verify:production   # verify deployed URL routes + content types
 ```
 
 ## Project Structure
@@ -104,8 +106,18 @@ You can copy the variable list from `.env.example`.
 npm run check:deploy
 ```
 
-`check:deploy` runs `lint + build + smoke:routes` (critical route health checks against a production server).
+`check:deploy` runs `lint + build + smoke:routes` (critical route health checks against a local production server).
 
 If this passes locally, Vercel auto-deploy from `main` is ready.
 
-A CI guardrail is included in `.github/workflows/deploy-preflight.yml` to run this same preflight automatically on every push/PR to `main`.
+### 6) Post-deploy verification
+
+After the project is live, run:
+
+```bash
+npm run verify:production -- --url=https://shevas.vercel.app
+```
+
+`verify:production` validates production endpoints (`/`, `/projects/*`, `/sitemap.xml`, `/robots.txt`, OG/Twitter images), status codes, and response content-type markers.
+
+A CI guardrail is included in `.github/workflows/deploy-preflight.yml` to run the preflight (`check:deploy`) automatically on every push/PR to `main`.

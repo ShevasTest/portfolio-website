@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "smoke:routes": "node scripts/smoke-routes.mjs",
+    "verify:production": "node scripts/verify-production.mjs",
     "check:deploy": "npm run lint && npm run build && npm run smoke:routes"
   },
   "dependencies": {
