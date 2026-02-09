@@ -83,10 +83,19 @@ export interface CryptoDashboardData {
 }
 
 async function fetchCoinGecko<T>(path: string): Promise<T> {
-  const response = await fetch(`${COINGECKO_API}${path}`, {
-    headers: {
-      accept: "application/json",
-    },
+  const apiKey = process.env.COINGECKO_API_KEY?.trim();
+  const baseUrl = apiKey
+    ? "https://pro-api.coingecko.com/api/v3"
+    : COINGECKO_API;
+  const headers: Record<string, string> = {
+    accept: "application/json",
+  };
+  if (apiKey) {
+    headers["x-cg-demo-key"] = apiKey;
+  }
+
+  const response = await fetch(`${baseUrl}${path}`, {
+    headers,
     next: {
       revalidate: 60,
     },

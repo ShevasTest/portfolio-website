@@ -12,7 +12,7 @@ export const SITE = {
   links: {
     telegram: "https://t.me/Shevas_o",
     farcaster: "https://warpcast.com/shevas",
-    github: "https://github.com/shevas",
+    github: "https://github.com/ShevasTest",
   },
 } as const;
 

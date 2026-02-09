@@ -80,7 +80,7 @@ const SOCIAL_LINKS: SocialLink[] = [
   },
   {
     name: "GitHub",
-    handle: "github.com/shevas",
+    handle: "github.com/ShevasTest",
     href: SITE.links.github,
     description: "Browse shipped code, architecture choices, and live repositories.",
     accent: "cyan",
