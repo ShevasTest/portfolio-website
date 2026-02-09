@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "status:deploy": "node scripts/deploy-readiness.mjs",
     "smoke:routes": "node scripts/smoke-routes.mjs",
     "verify:production": "node scripts/verify-production.mjs",
     "check:deploy": "npm run lint && npm run build && npm run smoke:routes"

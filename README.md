@@ -33,6 +33,7 @@ Built with a dark neon visual language, rich motion design, and interactive proj
 - Production smoke route checks (`npm run smoke:routes`) before deploy, including `/api/health`
 - Post-deploy production verifier (`npm run verify:production -- --url=https://...`) for routes + `/api/health`
 - Manual GitHub Actions workflow `Production Verify` for post-deploy QA (URL input + retry controls)
+- Deploy readiness report (`npm run status:deploy`) with git/remote/workflow/file checks before handoff
 
 ## Getting Started
 
@@ -50,6 +51,7 @@ npm run dev                 # start local dev server
 npm run build               # production build
 npm run start               # start production server
 npm run lint                # run lint checks
+npm run status:deploy       # deployment readiness report (git/files/workflows)
 npm run smoke:routes        # local production smoke checks for critical routes
 npm run verify:production   # verify deployed URL routes + content types
 ```
@@ -70,6 +72,14 @@ src/
 ```
 
 ## Deployment (Vercel)
+
+### 0) Check deployment readiness snapshot
+
+```bash
+npm run status:deploy
+```
+
+This report validates git branch/clean state, remote tracking, deploy scripts, and required workflow/config files.
 
 ### 1) Push repository to GitHub
 

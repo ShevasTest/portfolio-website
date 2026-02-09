@@ -3,8 +3,11 @@
 ## Pre-flight (local)
 
 - [ ] `npm install`
+- [ ] `npm run status:deploy` (git/remote/workflow/config readiness snapshot)
 - [ ] `npm run check:deploy` (lint + build + smoke route checks)
 - [ ] `.env.example` reviewed
+
+`status:deploy` should pass without ❌ failures; ⚠️ warnings are actionable hints (for example, missing `origin` remote before first push).
 
 ## CI Guardrail
 
