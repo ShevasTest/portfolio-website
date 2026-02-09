@@ -1,4 +1,9 @@
+import { setTimeout as delay } from "node:timers/promises";
+
 const REQUEST_TIMEOUT_MS = 15_000;
+const DEFAULT_ATTEMPTS = 4;
+const DEFAULT_RETRY_DELAY_MS = 5_000;
+const DEFAULT_INITIAL_DELAY_MS = 0;
 
 const routes = [
   {
@@ -56,9 +61,43 @@ const routes = [
   },
 ];
 
-const helpMessage = `Production verification for deployed portfolio\n\nUsage:\n  npm run verify:production -- --url=https://shevas.vercel.app\n  npm run verify:production -- https://shevas.vercel.app\n\nOr set PRODUCTION_URL environment variable:\n  PRODUCTION_URL=https://shevas.vercel.app npm run verify:production\n`;
+const helpMessage = `Production verification for deployed portfolio
 
-const getCliUrl = () => {
+Usage:
+  npm run verify:production -- --url=https://shevas.vercel.app
+  npm run verify:production -- https://shevas.vercel.app
+
+Optional retry controls:
+  npm run verify:production -- --url=https://shevas.vercel.app --attempts=5 --retry-delay-ms=6000 --initial-delay-ms=15000
+
+Options:
+  --url=<https://...>          Deployment URL
+  --attempts=<number>          Route check attempts before failing (default: ${DEFAULT_ATTEMPTS})
+  --retry-delay-ms=<number>    Delay between attempts in milliseconds (default: ${DEFAULT_RETRY_DELAY_MS})
+  --initial-delay-ms=<number>  Delay before checks start, useful right after deploy (default: ${DEFAULT_INITIAL_DELAY_MS})
+
+Environment fallbacks:
+  PRODUCTION_URL
+  VERIFY_ATTEMPTS
+  VERIFY_RETRY_DELAY_MS
+  VERIFY_INITIAL_DELAY_MS
+`;
+
+const parseIntegerOption = ({ value, label, defaultValue, min = 0 }) => {
+  if (value === undefined || value === null || value === "") {
+    return defaultValue;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+
+  if (!Number.isFinite(parsed) || parsed < min) {
+    throw new Error(`${label} must be an integer >= ${min}. Received: ${value}`);
+  }
+
+  return parsed;
+};
+
+const parseCliOptions = () => {
   const args = process.argv.slice(2);
 
   if (args.some((arg) => arg === "-h" || arg === "--help")) {
@@ -66,15 +105,97 @@ const getCliUrl = () => {
     process.exit(0);
   }
 
-  const flagValue = args.find((arg) => arg.startsWith("--url="));
+  const options = {
+    url: "",
+    attempts: parseIntegerOption({
+      value: process.env.VERIFY_ATTEMPTS,
+      label: "VERIFY_ATTEMPTS",
+      defaultValue: DEFAULT_ATTEMPTS,
+      min: 1,
+    }),
+    retryDelayMs: parseIntegerOption({
+      value: process.env.VERIFY_RETRY_DELAY_MS,
+      label: "VERIFY_RETRY_DELAY_MS",
+      defaultValue: DEFAULT_RETRY_DELAY_MS,
+      min: 0,
+    }),
+    initialDelayMs: parseIntegerOption({
+      value: process.env.VERIFY_INITIAL_DELAY_MS,
+      label: "VERIFY_INITIAL_DELAY_MS",
+      defaultValue: DEFAULT_INITIAL_DELAY_MS,
+      min: 0,
+    }),
+  };
 
-  if (flagValue) {
-    return flagValue.slice("--url=".length);
+  for (const arg of args) {
+    if (arg.startsWith("--url=")) {
+      options.url = arg.slice("--url=".length);
+      continue;
+    }
+
+    if (arg.startsWith("--attempts=")) {
+      options.attempts = parseIntegerOption({
+        value: arg.slice("--attempts=".length),
+        label: "--attempts",
+        defaultValue: DEFAULT_ATTEMPTS,
+        min: 1,
+      });
+      continue;
+    }
+
+    if (arg.startsWith("--retry-delay-ms=")) {
+      options.retryDelayMs = parseIntegerOption({
+        value: arg.slice("--retry-delay-ms=".length),
+        label: "--retry-delay-ms",
+        defaultValue: DEFAULT_RETRY_DELAY_MS,
+        min: 0,
+      });
+      continue;
+    }
+
+    if (arg.startsWith("--retry-delay=")) {
+      options.retryDelayMs = parseIntegerOption({
+        value: arg.slice("--retry-delay=".length),
+        label: "--retry-delay",
+        defaultValue: DEFAULT_RETRY_DELAY_MS,
+        min: 0,
+      });
+      continue;
+    }
+
+    if (arg.startsWith("--initial-delay-ms=")) {
+      options.initialDelayMs = parseIntegerOption({
+        value: arg.slice("--initial-delay-ms=".length),
+        label: "--initial-delay-ms",
+        defaultValue: DEFAULT_INITIAL_DELAY_MS,
+        min: 0,
+      });
+      continue;
+    }
+
+    if (arg.startsWith("--initial-delay=")) {
+      options.initialDelayMs = parseIntegerOption({
+        value: arg.slice("--initial-delay=".length),
+        label: "--initial-delay",
+        defaultValue: DEFAULT_INITIAL_DELAY_MS,
+        min: 0,
+      });
+      continue;
+    }
+
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}\n\n${helpMessage}`);
+    }
+
+    if (!options.url) {
+      options.url = arg;
+      continue;
+    }
+
+    throw new Error(`Unexpected positional argument: ${arg}\n\n${helpMessage}`);
   }
 
-  const firstPositional = args.find((arg) => !arg.startsWith("-"));
-
-  return firstPositional;
+  return options;
 };
 
 const normalizeBaseUrl = (input) => {
@@ -116,6 +237,14 @@ const assertBodyMarkers = (path, body, markers) => {
   }
 };
 
+const formatError = (error) => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
+};
+
 const checkRoute = async (baseUrl, route) => {
   const url = `${baseUrl}${route.path}`;
   const response = await fetch(url, {
@@ -144,20 +273,60 @@ const checkRoute = async (baseUrl, route) => {
   console.log(`✓ ${route.path} [${response.status}] (${contentType || "no content-type"})`);
 };
 
+const checkRouteWithRetry = async ({ baseUrl, route, attempts, retryDelayMs }) => {
+  let lastError;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      await checkRoute(baseUrl, route);
+      return;
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === attempts) {
+        break;
+      }
+
+      console.warn(
+        `⚠ ${route.path} attempt ${attempt}/${attempts} failed. Retrying in ${retryDelayMs}ms.\n  ↳ ${formatError(error)}`,
+      );
+
+      await delay(retryDelayMs);
+    }
+  }
+
+  throw new Error(
+    `Route verification failed after ${attempts} attempt(s): ${route.path}\n${formatError(lastError)}`,
+  );
+};
+
 const main = async () => {
   try {
-    const baseUrl = normalizeBaseUrl(getCliUrl() ?? process.env.PRODUCTION_URL ?? "");
+    const options = parseCliOptions();
+    const baseUrl = normalizeBaseUrl(options.url || process.env.PRODUCTION_URL || "");
 
     console.log(`Running production verification for ${baseUrl}`);
+    console.log(
+      `Retry policy: attempts=${options.attempts}, retryDelayMs=${options.retryDelayMs}, initialDelayMs=${options.initialDelayMs}`,
+    );
+
+    if (options.initialDelayMs > 0) {
+      console.log(`Waiting ${options.initialDelayMs}ms before route checks...`);
+      await delay(options.initialDelayMs);
+    }
 
     for (const route of routes) {
-      await checkRoute(baseUrl, route);
+      await checkRouteWithRetry({
+        baseUrl,
+        route,
+        attempts: options.attempts,
+        retryDelayMs: options.retryDelayMs,
+      });
     }
 
     console.log("Production verification passed.");
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(message);
+    console.error(formatError(error));
     process.exitCode = 1;
   }
 };

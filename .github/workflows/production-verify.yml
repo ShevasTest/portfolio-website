@@ -1,0 +1,73 @@
+name: Production Verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      production_url:
+        description: "Production URL to verify (for example: https://shevas.vercel.app)"
+        required: false
+        type: string
+      attempts:
+        description: "Retry attempts per route"
+        required: false
+        default: "4"
+        type: string
+      retry_delay_ms:
+        description: "Delay between attempts in milliseconds"
+        required: false
+        default: "5000"
+        type: string
+      initial_delay_ms:
+        description: "Delay before checks start (useful right after a fresh deploy)"
+        required: false
+        default: "15000"
+        type: string
+
+jobs:
+  verify-production:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve production URL
+        env:
+          INPUT_PRODUCTION_URL: ${{ inputs.production_url }}
+          VAR_PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+          SECRET_PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
+        run: |
+          URL="${INPUT_PRODUCTION_URL:-${VAR_PRODUCTION_URL:-${SECRET_PRODUCTION_URL:-}}}"
+
+          if [ -z "$URL" ]; then
+            echo "::error::Missing production URL. Provide workflow input 'production_url' or set repository variable/secret PRODUCTION_URL."
+            exit 1
+          fi
+
+          echo "Resolved production URL: $URL"
+          echo "PRODUCTION_URL=$URL" >> "$GITHUB_ENV"
+
+      - name: Run production verifier
+        env:
+          INPUT_ATTEMPTS: ${{ inputs.attempts }}
+          INPUT_RETRY_DELAY_MS: ${{ inputs.retry_delay_ms }}
+          INPUT_INITIAL_DELAY_MS: ${{ inputs.initial_delay_ms }}
+        run: |
+          ATTEMPTS="${INPUT_ATTEMPTS:-4}"
+          RETRY_DELAY_MS="${INPUT_RETRY_DELAY_MS:-5000}"
+          INITIAL_DELAY_MS="${INPUT_INITIAL_DELAY_MS:-15000}"
+
+          npm run verify:production -- \
+            --url="$PRODUCTION_URL" \
+            --attempts="$ATTEMPTS" \
+            --retry-delay-ms="$RETRY_DELAY_MS" \
+            --initial-delay-ms="$INITIAL_DELAY_MS"

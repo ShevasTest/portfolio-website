@@ -32,6 +32,7 @@ Built with a dark neon visual language, rich motion design, and interactive proj
 - GitHub Actions preflight workflow (`npm run check:deploy` on push/PR to `main`)
 - Production smoke route checks (`npm run smoke:routes`) before deploy, including `/api/health`
 - Post-deploy production verifier (`npm run verify:production -- --url=https://...`) for routes + `/api/health`
+- Manual GitHub Actions workflow `Production Verify` for post-deploy QA (URL input + retry controls)
 
 ## Getting Started
 
@@ -115,9 +116,13 @@ If this passes locally, Vercel auto-deploy from `main` is ready.
 After the project is live, run:
 
 ```bash
-npm run verify:production -- --url=https://shevas.vercel.app
+npm run verify:production -- --url=https://shevas.vercel.app --attempts=5 --retry-delay-ms=6000 --initial-delay-ms=15000
 ```
 
-`verify:production` validates production endpoints (`/`, `/projects/*`, `/api/health`, `/sitemap.xml`, `/robots.txt`, OG/Twitter images), status codes, and response content-type markers.
+`verify:production` validates production endpoints (`/`, `/projects/*`, `/api/health`, `/sitemap.xml`, `/robots.txt`, OG/Twitter images), status codes, content-type markers, and supports retries for fresh deploy warm-up windows.
 
-A CI guardrail is included in `.github/workflows/deploy-preflight.yml` to run the preflight (`check:deploy`) automatically on every push/PR to `main`.
+You can also run the same verification from GitHub Actions via `.github/workflows/production-verify.yml` (workflow: **Production Verify**).
+
+CI guardrails included:
+- `.github/workflows/deploy-preflight.yml` — runs `check:deploy` on every push/PR to `main`
+- `.github/workflows/production-verify.yml` — manual post-deploy verification with URL input + retry controls

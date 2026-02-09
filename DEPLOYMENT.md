@@ -10,6 +10,7 @@
 
 - [x] GitHub Actions preflight workflow added: `.github/workflows/deploy-preflight.yml`
 - [x] Push/PR to `main` runs `npm run check:deploy` automatically
+- [x] Manual post-deploy verifier workflow added: `.github/workflows/production-verify.yml`
 
 ## Automated Smoke Coverage
 
@@ -41,7 +42,8 @@
 
 ## Automated Production Verification
 
-- [ ] `npm run verify:production -- --url=https://<production-domain>`
+- [ ] `npm run verify:production -- --url=https://<production-domain> --attempts=5 --retry-delay-ms=6000 --initial-delay-ms=15000`
+- [ ] Or run GitHub Actions workflow **Production Verify** (`.github/workflows/production-verify.yml`) with `production_url` input
 - [ ] Verifier passes on all critical endpoints (`/`, `/projects/*`, `/api/health`, `/sitemap.xml`, `/robots.txt`, `/opengraph-image`, `/twitter-image`)
 
 ## Final QA (production URL)
