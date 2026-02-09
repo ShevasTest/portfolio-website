@@ -9,14 +9,15 @@ const port = Number.parseInt(process.env.SMOKE_PORT ?? "", 10) || DEFAULT_PORT;
 const baseUrl = `http://127.0.0.1:${port}`;
 
 const routes = [
-  { path: "/", contentTypes: ["text/html"] },
-  { path: "/projects/crypto-dashboard", contentTypes: ["text/html"] },
-  { path: "/projects/ai-chat", contentTypes: ["text/html"] },
-  { path: "/projects/defi-analytics", contentTypes: ["text/html"] },
-  { path: "/projects/farcaster-widget", contentTypes: ["text/html"] },
-  { path: "/projects/telegram-bot", contentTypes: ["text/html"] },
-  { path: "/sitemap.xml", contentTypes: ["application/xml", "text/xml"] },
-  { path: "/robots.txt", contentTypes: ["text/plain"] },
+  { path: "/", contentTypes: ["text/html"], mustInclude: ["SHEVAS"] },
+  { path: "/projects/crypto-dashboard", contentTypes: ["text/html"], mustInclude: ["Crypto Dashboard"] },
+  { path: "/projects/ai-chat", contentTypes: ["text/html"], mustInclude: ["AI Chat Interface"] },
+  { path: "/projects/defi-analytics", contentTypes: ["text/html"], mustInclude: ["DeFi Analytics"] },
+  { path: "/projects/farcaster-widget", contentTypes: ["text/html"], mustInclude: ["Farcaster"] },
+  { path: "/projects/telegram-bot", contentTypes: ["text/html"], mustInclude: ["Telegram Bot"] },
+  { path: "/api/health", contentTypes: ["application/json"], mustInclude: ['"status":"ok"', '"service":"shevas-portfolio"'] },
+  { path: "/sitemap.xml", contentTypes: ["application/xml", "text/xml"], mustInclude: ["<urlset", "/projects/telegram-bot"] },
+  { path: "/robots.txt", contentTypes: ["text/plain"], mustInclude: ["Sitemap:"] },
   { path: "/opengraph-image", contentTypes: ["image/png"] },
   { path: "/twitter-image", contentTypes: ["image/png"] },
 ];
@@ -66,7 +67,7 @@ const waitForServer = async () => {
   throw new Error(`Timed out waiting for Next.js server at ${baseUrl}.\n${logs}`);
 };
 
-const assertRoute = async (path, contentTypes) => {
+const assertRoute = async ({ path, contentTypes, mustInclude = [] }) => {
   const url = `${baseUrl}${path}`;
   const response = await fetch(url, { redirect: "follow" });
 
@@ -81,6 +82,19 @@ const assertRoute = async (path, contentTypes) => {
     throw new Error(
       `Unexpected content-type for ${path}: "${contentType}". Expected one of: ${contentTypes.join(", ")}`,
     );
+  }
+
+  if (mustInclude.length > 0) {
+    const body = await response.text();
+    const missingMarkers = mustInclude.filter((marker) => !body.includes(marker));
+
+    if (missingMarkers.length > 0) {
+      throw new Error(
+        `Response for ${path} is missing expected text marker(s): ${missingMarkers.join(", ")}`,
+      );
+    }
+  } else {
+    await response.arrayBuffer();
   }
 
   console.log(`✓ ${path} [${contentType}]`);
@@ -118,7 +132,7 @@ try {
   console.log(`Running deployment smoke checks against ${baseUrl}`);
 
   for (const route of routes) {
-    await assertRoute(route.path, route.contentTypes);
+    await assertRoute(route);
   }
 
   console.log("Smoke checks passed.");

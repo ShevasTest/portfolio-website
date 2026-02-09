@@ -30,8 +30,8 @@ Built with a dark neon visual language, rich motion design, and interactive proj
   - app icon and apple icon routes
 - Mobile-first responsive behavior with touch-safe animation fallbacks
 - GitHub Actions preflight workflow (`npm run check:deploy` on push/PR to `main`)
-- Production smoke route checks (`npm run smoke:routes`) before deploy
-- Post-deploy production verifier (`npm run verify:production -- --url=https://...`)
+- Production smoke route checks (`npm run smoke:routes`) before deploy, including `/api/health`
+- Post-deploy production verifier (`npm run verify:production -- --url=https://...`) for routes + `/api/health`
 
 ## Getting Started
 
@@ -106,7 +106,7 @@ You can copy the variable list from `.env.example`.
 npm run check:deploy
 ```
 
-`check:deploy` runs `lint + build + smoke:routes` (critical route health checks against a local production server).
+`check:deploy` runs `lint + build + smoke:routes` (critical route checks, including `/api/health`, against a local production server).
 
 If this passes locally, Vercel auto-deploy from `main` is ready.
 
@@ -118,6 +118,6 @@ After the project is live, run:
 npm run verify:production -- --url=https://shevas.vercel.app
 ```
 
-`verify:production` validates production endpoints (`/`, `/projects/*`, `/sitemap.xml`, `/robots.txt`, OG/Twitter images), status codes, and response content-type markers.
+`verify:production` validates production endpoints (`/`, `/projects/*`, `/api/health`, `/sitemap.xml`, `/robots.txt`, OG/Twitter images), status codes, and response content-type markers.
 
 A CI guardrail is included in `.github/workflows/deploy-preflight.yml` to run the preflight (`check:deploy`) automatically on every push/PR to `main`.

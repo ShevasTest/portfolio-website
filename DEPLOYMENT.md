@@ -16,6 +16,7 @@
 - [x] `npm run smoke:routes` boots production build locally and checks key routes:
   - `/`
   - `/projects/*`
+  - `/api/health`
   - `/sitemap.xml`
   - `/robots.txt`
   - `/opengraph-image`
@@ -41,7 +42,7 @@
 ## Automated Production Verification
 
 - [ ] `npm run verify:production -- --url=https://<production-domain>`
-- [ ] Verifier passes on all critical endpoints (`/`, `/projects/*`, `/sitemap.xml`, `/robots.txt`, `/opengraph-image`, `/twitter-image`)
+- [ ] Verifier passes on all critical endpoints (`/`, `/projects/*`, `/api/health`, `/sitemap.xml`, `/robots.txt`, `/opengraph-image`, `/twitter-image`)
 
 ## Final QA (production URL)
 
@@ -51,6 +52,7 @@
 - [ ] `/projects/defi-analytics`
 - [ ] `/projects/farcaster-widget`
 - [ ] `/projects/telegram-bot`
+- [ ] `/api/health`
 - [ ] `/sitemap.xml`
 - [ ] `/robots.txt`
 - [ ] Open Graph + Twitter previews are generated

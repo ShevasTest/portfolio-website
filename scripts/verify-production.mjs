@@ -32,6 +32,11 @@ const routes = [
     mustInclude: ["Telegram Bot"],
   },
   {
+    path: "/api/health",
+    contentTypes: ["application/json"],
+    mustInclude: ['"status":"ok"', '"service":"shevas-portfolio"'],
+  },
+  {
     path: "/sitemap.xml",
     contentTypes: ["application/xml", "text/xml"],
     mustInclude: ["<urlset", "/projects/telegram-bot"],
