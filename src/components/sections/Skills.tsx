@@ -16,49 +16,51 @@ const SKILL_CATEGORIES: SkillCategory[] = [
   {
     name: "Frontend",
     accent: "cyan",
-    orbit: 0,
-    confidence: "Pixel-perfect interfaces with motion-first UX.",
-    skills: ["Next.js", "TypeScript", "Tailwind v4", "Framer Motion"],
+    orbit: 30,
+    confidence: "React, Next.js, Tailwind — production-grade UI at speed.",
+    skills: ["TypeScript", "React", "Next.js", "Tailwind CSS", "Three.js"],
   },
   {
     name: "Backend",
     accent: "purple",
-    orbit: 72,
-    confidence: "Reliable APIs, data pipelines, and automation layers.",
-    skills: ["Node.js", "Python", "PostgreSQL", "WebSockets"],
+    orbit: 90,
+    confidence: "APIs, databases, and infra that scale.",
+    skills: ["Node.js", "Python", "PostgreSQL", "Redis", "Docker"],
   },
   {
     name: "Web3",
     accent: "cyan",
-    orbit: 144,
-    confidence: "On-chain products, analytics, and protocol integrations.",
-    skills: ["Solidity", "Ethers.js", "DeFi", "On-chain Data"],
+    orbit: 150,
+    confidence: "Smart contracts, DeFi protocols, on-chain analytics.",
+    skills: ["Solidity", "Ethereum", "Base", "DeFi", "Farcaster"],
   },
   {
-    name: "AI",
+    name: "AI / ML",
     accent: "purple",
-    orbit: 216,
-    confidence: "LLM features, agent workflows, and production prompts.",
-    skills: ["LLM APIs", "RAG", "Agent Design", "Prompt Systems"],
+    orbit: 210,
+    confidence: "LLM integration, prompt engineering, AI agents.",
+    skills: ["Claude AI", "OpenAI", "LangChain", "RAG", "Agents"],
   },
   {
-    name: "Tools",
+    name: "DevOps",
     accent: "cyan",
-    orbit: 288,
-    confidence: "From local DX to cloud deploys and observability.",
-    skills: ["Git", "Docker", "Vercel", "CI/CD"],
+    orbit: 270,
+    confidence: "CI/CD, containers, cloud deploy.",
+    skills: ["Vercel", "Git", "GitHub Actions", "Linux"],
+  },
+  {
+    name: "Design",
+    accent: "purple",
+    orbit: 330,
+    confidence: "UI/UX with attention to motion and detail.",
+    skills: ["Figma", "Motion Design", "Responsive", "A11y"],
   },
 ];
 
-function OrbitalSkills({
-  spinDuration,
-  compact,
-}: {
-  spinDuration: number;
-  compact: boolean;
-}) {
+/* ─── Orbital: desktop only, simplified ─── */
+function OrbitalSkills({ spinDuration }: { spinDuration: number }) {
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[320px] min-[420px]:max-w-[380px] sm:max-w-[480px]">
+    <div className="relative mx-auto aspect-square w-full max-w-[480px]">
       <motion.div
         initial={{ opacity: 0, scale: 0.92 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -76,7 +78,7 @@ function OrbitalSkills({
           className="absolute inset-0"
         >
           {SKILL_CATEGORIES.map((category, index) => {
-            const radius = compact ? 37 : 40;
+            const radius = 40;
             const angle = (category.orbit * Math.PI) / 180;
             const x = 50 + Math.cos(angle) * radius;
             const y = 50 + Math.sin(angle) * radius;
@@ -101,25 +103,13 @@ function OrbitalSkills({
                   transition={{ duration: spinDuration, repeat: Infinity, ease: "linear" }}
                   className="relative"
                 >
-                  <motion.div
-                    animate={{ scale: [1, 1.12, 1], opacity: [0.35, 0.7, 0.35] }}
-                    transition={{
-                      duration: 2.4,
-                      repeat: Infinity,
-                      delay: index * 0.25,
-                      ease: "easeInOut",
-                    }}
-                    className={`absolute inset-0 rounded-full blur-md ${
-                      isCyan ? "bg-cyan/30" : "bg-purple/30"
-                    }`}
-                  />
                   <div
-                    className={`glass relative rounded-full border px-3 py-1.5 text-center sm:px-4 sm:py-2 ${
+                    className={`glass relative rounded-full border px-4 py-2 text-center ${
                       isCyan ? "border-cyan/35" : "border-purple/35"
                     }`}
                   >
                     <p
-                      className={`font-mono text-[9px] tracking-wide uppercase sm:text-[10px] ${
+                      className={`font-mono text-[10px] tracking-wide uppercase ${
                         isCyan ? "text-cyan" : "text-purple"
                       }`}
                     >
@@ -133,29 +123,22 @@ function OrbitalSkills({
         </motion.div>
 
         <div className="absolute left-1/2 top-1/2 h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2">
-          <motion.div
-            animate={{ boxShadow: [
-              "0 0 20px rgba(0,255,224,0.18)",
-              "0 0 42px rgba(139,92,246,0.24)",
-              "0 0 20px rgba(0,255,224,0.18)",
-            ] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="glass flex h-full w-full flex-col items-center justify-center rounded-full border border-cyan/20 bg-bg-card/70"
-          >
+          <div className="glass flex h-full w-full flex-col items-center justify-center rounded-full border border-cyan/20 bg-bg-card/70">
             <span className="font-mono text-[10px] tracking-[0.2em] text-text-muted uppercase">
               Core
             </span>
-            <span className="mt-1 text-gradient text-base font-semibold tracking-tight min-[420px]:text-lg sm:text-xl">
+            <span className="mt-1 text-gradient text-xl font-semibold tracking-tight">
               SHEVAS
             </span>
             <span className="font-mono text-[10px] text-text-muted">AI × Web3</span>
-          </motion.div>
+          </div>
         </div>
       </motion.div>
     </div>
   );
 }
 
+/* ─── Category Card: no blur animations ─── */
 function CategoryCard({
   category,
   index,
@@ -167,12 +150,12 @@ function CategoryCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{
-        duration: 0.55,
-        delay: index * 0.08,
+        duration: 0.45,
+        delay: index * 0.06,
         ease: [0.22, 1, 0.36, 1] as const,
       }}
       className={`glass group relative overflow-hidden rounded-2xl p-5 ${
@@ -206,16 +189,9 @@ function CategoryCard({
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {category.skills.map((skill, chipIndex) => (
-            <motion.span
+          {category.skills.map((skill) => (
+            <span
               key={skill}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{
-                duration: 0.3,
-                delay: index * 0.05 + chipIndex * 0.04,
-              }}
               className={`rounded-full border px-2.5 py-1 font-mono text-[10px] ${
                 isCyan
                   ? "border-cyan/20 text-cyan/75"
@@ -223,7 +199,7 @@ function CategoryCard({
               }`}
             >
               {skill}
-            </motion.span>
+            </span>
           ))}
         </div>
       </div>
@@ -246,9 +222,9 @@ export function Skills() {
         />
 
         <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-[1.1fr_1fr]">
-          <OrbitalSkills spinDuration={isCoarsePointer ? 70 : 45} compact={isCoarsePointer} />
+          {!isCoarsePointer && <OrbitalSkills spinDuration={45} />}
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className={`grid gap-4 sm:grid-cols-2 ${isCoarsePointer ? "lg:col-span-2" : ""}`}>
             {SKILL_CATEGORIES.map((category, index) => (
               <CategoryCard
                 key={category.name}

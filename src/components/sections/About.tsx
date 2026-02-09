@@ -130,8 +130,8 @@ function TechPill({
 }) {
   return (
     <motion.span
-      initial={{ opacity: 0, scale: 0.7, filter: "blur(4px)" }}
-      whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      initial={{ opacity: 0, scale: 0.7 }}
+      whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{
         delay: index * 0.04,
