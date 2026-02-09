@@ -9,9 +9,10 @@
     "lint": "next lint",
     "status:deploy": "node scripts/deploy-readiness.mjs",
     "connect:origin": "node scripts/connect-origin.mjs",
+    "env:contract": "node scripts/check-env-contract.mjs",
     "smoke:routes": "node scripts/smoke-routes.mjs",
     "verify:production": "node scripts/verify-production.mjs",
-    "check:deploy": "npm run lint && npm run build && npm run smoke:routes"
+    "check:deploy": "npm run env:contract && npm run lint && npm run build && npm run smoke:routes"
   },
   "dependencies": {
     "@react-three/drei": "^9.121.3",

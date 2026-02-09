@@ -56,6 +56,7 @@ const requiredFiles = [
   { path: ".github/workflows/deploy-preflight.yml", label: "Preflight workflow" },
   { path: ".github/workflows/production-verify.yml", label: "Production verify workflow" },
   { path: "scripts/connect-origin.mjs", label: "Origin connector script" },
+  { path: "scripts/check-env-contract.mjs", label: "Environment contract script" },
   { path: "scripts/smoke-routes.mjs", label: "Smoke routes script" },
   { path: "scripts/verify-production.mjs", label: "Production verifier script" },
 ];
@@ -189,7 +190,13 @@ const main = async () => {
     const packageData = JSON.parse(packageRaw);
     const scripts = packageData.scripts ?? {};
 
-    const requiredScripts = ["check:deploy", "connect:origin", "smoke:routes", "verify:production"];
+    const requiredScripts = [
+      "check:deploy",
+      "connect:origin",
+      "env:contract",
+      "smoke:routes",
+      "verify:production",
+    ];
     const missingScripts = requiredScripts.filter((scriptName) => typeof scripts[scriptName] !== "string");
 
     if (missingScripts.length === 0) {

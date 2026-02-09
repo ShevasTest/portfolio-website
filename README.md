@@ -35,6 +35,7 @@ Built with a dark neon visual language, rich motion design, and interactive proj
 - Manual GitHub Actions workflow `Production Verify` for post-deploy QA (URL input + retry controls)
 - Deploy readiness report (`npm run status:deploy`) with git/remote/workflow/file checks before handoff
 - Origin bootstrap helper (`npm run connect:origin -- --url=... --push`) for GitHub handoff with safety checks
+- Environment contract check (`npm run env:contract`) to ensure `.env.example` matches runtime `process.env` usage
 
 ## Getting Started
 
@@ -54,6 +55,7 @@ npm run start               # start production server
 npm run lint                # run lint checks
 npm run status:deploy       # deployment readiness report (git/files/workflows)
 npm run connect:origin      # configure git origin URL (+ optional --push)
+npm run env:contract        # validate runtime env contract vs .env.example
 npm run smoke:routes        # local production smoke checks for critical routes
 npm run verify:production   # verify deployed URL routes + content types
 ```
@@ -127,7 +129,7 @@ You can copy the variable list from `.env.example`.
 npm run check:deploy
 ```
 
-`check:deploy` runs `lint + build + smoke:routes` (critical route checks, including `/api/health`, against a local production server).
+`check:deploy` runs `env:contract + lint + build + smoke:routes` (critical route checks, including `/api/health`, against a local production server).
 
 If this passes locally, Vercel auto-deploy from `main` is ready.
 
